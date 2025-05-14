@@ -1,13 +1,11 @@
-
-const functions = require('firebase-functions');
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
+require('dotenv').config(); // Load environment variables from .env file
 
 const app = express();
-
-require('dotenv').config(); // Load environment variables from .env file
-const SPOONACULAR_API_KEY = process.env.SPOONACULAR_API_KEY; // secure it later with env vars
+const PORT = process.env.PORT || 4000; // Render sets PORT automatically
+const SPOONACULAR_API_KEY = process.env.SPOONACULAR_API_KEY;
 
 app.use(cors());
 app.use(express.json());
@@ -48,14 +46,12 @@ app.post('/api/find', async (req, res) => {
       )
     );
 
-    const finalRecipes = detailedResults.map((res, index) => {
-      return {
-        title: res.title,
-        image: res.image,
-        sourceUrl: res.sourceUrl,
-        usedIngredients: recipes[index].usedIngredients.map((ing) => ing.name),
-      };
-    });
+    const finalRecipes = detailedResults.map((res, index) => ({
+      title: res.title,
+      image: res.image,
+      sourceUrl: res.sourceUrl,
+      usedIngredients: recipes[index].usedIngredients.map((ing) => ing.name),
+    }));
 
     res.json(finalRecipes);
   } catch (error) {
@@ -64,5 +60,7 @@ app.post('/api/find', async (req, res) => {
   }
 });
 
-// ✅ This is required for Firebase deployment
-exports.api = functions.https.onRequest(app);
+// 🔥 Key change: Listen on PORT (Render handles the port injection)
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
