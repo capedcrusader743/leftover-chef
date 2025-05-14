@@ -1,10 +1,13 @@
+
+const functions = require('firebase-functions');
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
-const app = express();
-const PORT = 4000;
 
-const SPOONACULAR_API_KEY = '7c0dbb570f1d45778a8c2eb4c7aa1b3c'; // replace with your real key
+const app = express();
+
+require('dotenv').config(); // Load environment variables from .env file
+const SPOONACULAR_API_KEY = process.env.SPOONACULAR_API_KEY; // secure it later with env vars
 
 app.use(cors());
 app.use(express.json());
@@ -61,5 +64,5 @@ app.post('/api/find', async (req, res) => {
   }
 });
 
-
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+// ✅ This is required for Firebase deployment
+exports.api = functions.https.onRequest(app);
