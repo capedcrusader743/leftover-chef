@@ -1,21 +1,21 @@
-import React, { useState } from "react";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "./firebase";
+import React, { useEffect, useState } from "react";
+// import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth, registerWithEmailAndPassword } from "./firebase";
 import { useNavigate } from "react-router-dom";
+import { useAuthState } from "react-firebase-hooks/auth";
 
 function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [user, loading, error] = useAuthState(auth);
   const navigate = useNavigate();
 
-  const handleRegister = async () => {
-    try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      navigate("/"); // Redirect after registration
-    } catch (error) {
-      alert(error.message);
+  useEffect(() => {
+    if (loading) {
+      return;
     }
-  };
+    if (user) navigate("/home");
+  }, [user, loading]);
 
   return (
     <div className="max-w-md mx-auto mt-10">
@@ -35,7 +35,7 @@ function Register() {
         onChange={(e) => setPassword(e.target.value)}
       />
       <button
-        onClick={handleRegister}
+        onClick={registerWithEmailAndPassword}
         className="bg-green-500 text-white px-4 py-2 rounded"
       >
         Register

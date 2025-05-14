@@ -1,21 +1,21 @@
-import React, { useState } from "react";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "./firebase";
+import React, { useEffect, useState } from "react";
+import { auth, logInWithEmailAndPassword, signInWithGoogle } from "./firebase";
 import { useNavigate } from "react-router-dom";
+import { useAuthState } from "react-firebase-hooks/auth";
+// import { signInWithEmailAndPassword } from "firebase/auth";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [user, loading, error] = useAuthState(auth);
   const navigate = useNavigate();
 
-  const handleLogin = async () => {
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      navigate("/"); // Go to home on success
-    } catch (error) {
-      alert(error.message);
+  useEffect(() => {
+    if (loading) {
+      return;
     }
-  };
+    if (user) navigate("/home");
+  }, [user, loading]);
 
   return (
     <div className="max-w-md mx-auto mt-10">
@@ -35,11 +35,18 @@ function Login() {
         onChange={(e) => setPassword(e.target.value)}
       />
       <button
-        onClick={handleLogin}
+        onClick={logInWithEmailAndPassword}
         className="bg-blue-500 text-white px-4 py-2 rounded"
       >
         Login
       </button>
+      <button
+        onClick={signInWithGoogle}
+        className="bg-red-500 text-white px-4 py-2 rounded mt-2"
+      >
+        Login with Google
+      </button>
+        
     </div>
   );
 }

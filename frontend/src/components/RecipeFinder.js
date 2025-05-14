@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 import IngredientTags from "./IngredientTags";
+import { useNavigate } from "react-router-dom";
+import { getAuth, signOut } from "firebase/auth"; // Firebase logout
 
 function RecipeFinder() {
   const [inputText, setInputText] = useState("");
@@ -8,11 +10,22 @@ function RecipeFinder() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const navigate = useNavigate();
+  const auth = getAuth();
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      navigate("/"); // Redirect to signin page
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
   const fetchRecipes = async (ingredients) => {
     setLoading(true);
-
     try {
-      const response = await axios.post("http://localhost:4000/api/find", {
+      const response = await axios.post('https://leftover-chef.onrender.com/api/find', {
         ingredients,
       });
       setResults(response.data);
@@ -51,7 +64,15 @@ function RecipeFinder() {
 
   return (
     <div className="max-w-xl mx-auto mt-10 p-4">
-      <h1 className="text-2xl font-bold mb-4">Leftover Chef</h1>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">Leftover Chef</h1>
+        <button
+          onClick={handleLogout}
+          className="bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-700"
+        >
+          Logout
+        </button>
+      </div>
 
       <input
         type="text"
