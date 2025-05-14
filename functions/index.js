@@ -7,7 +7,19 @@ const app = express();
 const PORT = process.env.PORT || 4000; // Render sets PORT automatically
 const SPOONACULAR_API_KEY = process.env.SPOONACULAR_API_KEY;
 
-app.use(cors());
+const allowedOrigins = [
+  "https://localhost:3000",
+  "https://leftover-chef-1044f.web.app",
+  "https://leftover-chef-1044f.firebaseapp.com",
+];
+
+app.use(
+  cors({
+    origin: allowedOrigins,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 app.post('/api/find', async (req, res) => {
