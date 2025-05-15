@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { auth, db } from '../pages/firebase'; 
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 import { Link } from 'react-router-dom';
 
 const Favorites = () => {
@@ -8,16 +8,19 @@ const Favorites = () => {
 
   useEffect(() => {
     const fetchFavorites = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+
       try {
         const favoritesRef = collection(db, 'favorites');
-        const snapshot = await getDocs(favoritesRef);
+        const q = query(favoritesRef, where('uid', '==', user.uid));
+        const snapshot = await getDocs(q);
         const favoritesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setFavorites(favoritesData);
       } catch (error) {
         console.error("Error fetching favorites:", error);
       }
     };
-
     fetchFavorites();
   }, []);
 

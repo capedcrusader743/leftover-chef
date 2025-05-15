@@ -62,8 +62,12 @@ const registerWithEmailAndPassword = async (email, password) => {
   try {
     await createUserWithEmailAndPassword(auth, email, password);
   } catch (error) {
-    console.error("Error registering with email and password: ", error);
-    // Handle error (e.g., show a message to the user)
+    if (error.code === 'auth/email-already-in-use') {
+      alert("Email already in use");
+    } else {
+      alert("Error registering: ", error.message);
+    }
+    throw error;
   }
 }
 

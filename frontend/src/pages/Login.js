@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { auth, logInWithEmailAndPassword, signInWithGoogle } from "./firebase";
+import { auth, logInWithEmailAndPassword, signInWithGoogle, sendPasswordReset } from "./firebase";
 import { useNavigate } from "react-router-dom";
 import { useAuthState } from "react-firebase-hooks/auth";
-// import { signInWithEmailAndPassword } from "firebase/auth";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -35,7 +34,7 @@ function Login() {
         onChange={(e) => setPassword(e.target.value)}
       />
       <button
-        onClick={logInWithEmailAndPassword}
+        onClick={() => logInWithEmailAndPassword(email, password)}
         className="bg-blue-500 text-white px-4 py-2 rounded"
       >
         Login
@@ -46,7 +45,9 @@ function Login() {
       >
         Login with Google
       </button>
-        
+      <p className="mt-4 text-sm text-blue-600 hover:underline cursor-pointer text-center" onClick={() => sendPasswordReset(email)}>
+        Forgot Password?
+      </p>
     </div>
   );
 }

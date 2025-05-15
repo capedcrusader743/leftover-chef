@@ -1,8 +1,16 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { auth } from './firebase';
+import { useAuthState } from 'react-firebase-hooks/auth';
 
 function Splash() {
+  const [user, loading] = useAuthState(auth);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (loading) return; // wait for auth to load
+    if (user) navigate('/home'); // redirect if already logged in
+  }, [user, loading, navigate]);
 
   const handleNavigation = (path) => {
     navigate(path);

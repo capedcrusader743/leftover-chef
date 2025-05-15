@@ -35,7 +35,7 @@ function Register() {
         onChange={(e) => setPassword(e.target.value)}
       />
       <button
-        onClick={registerWithEmailAndPassword}
+        onClick={() => registerWithEmailAndPassword(email, password)}
         className="bg-green-500 text-white px-4 py-2 rounded"
       >
         Register
