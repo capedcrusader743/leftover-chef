@@ -2,7 +2,10 @@ import React, { useState } from "react";
 import axios from "axios";
 import IngredientTags from "./IngredientTags";
 import { useNavigate } from "react-router-dom";
-import { getAuth, signOut } from "firebase/auth"; // Firebase logout
+import { getAuth, signOut, onAuthStateChanged } from "firebase/auth"; // Firebase logout
+import { collection, doc, addDoc } from "firebase/firestore"; // Firebase Firestore
+import { auth, db } from "../pages/firebase"; // Firebase initialization
+import { Link } from "react-router-dom"; // For navigation
 
 function RecipeFinder() {
   const [inputText, setInputText] = useState("");
@@ -12,6 +15,31 @@ function RecipeFinder() {
 
   const navigate = useNavigate();
   const auth = getAuth();
+
+  const saveToFavorites = async (recipe) => {
+    const user = auth.currentUser;
+    if (!user) return;
+  
+    const recipeId = recipe.id || recipe.recipeId || recipe.title; // fallback
+  
+    if (!recipeId) {
+      console.error("Recipe ID missing:", recipe);
+      return;
+    }
+  
+    try {
+      await addDoc(collection(db, "favorites"), {
+        uid: user.uid,
+        id: recipeId,
+        title: recipe.title,
+        sourceUrl: recipe.sourceUrl,
+        // image: recipe.image, // only if you can afford the image plan
+      });
+      alert("Recipe saved to favorites!");
+    } catch (error) {
+      console.error("Error saving recipe:", error);
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -62,6 +90,8 @@ function RecipeFinder() {
     }
   };
 
+
+
   return (
     <div className="max-w-xl mx-auto mt-10 p-4">
       <div className="flex justify-between items-center mb-4">
@@ -72,6 +102,10 @@ function RecipeFinder() {
         >
           Logout
         </button>
+        <Link to="/favorites" 
+          className="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition duration-200">
+            View Favorites
+          </Link>
       </div>
 
       <input
@@ -127,6 +161,12 @@ function RecipeFinder() {
                     >
                       View Recipe →
                     </a>
+                    <button
+                      onClick={() => saveToFavorites(recipe)}
+                      className="mt-2 bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+                    >
+                      ❤️ Save to Favorites
+                    </button>
                   </div>
                 ))}
               </div>
