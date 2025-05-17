@@ -5,6 +5,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Splash from "./pages/Splash";
 import Favorites from "./pages/Favorites";
+import AddRecipe from "./pages/AddRecipe";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/favorites" element={<Favorites />} />
+        <Route path="/add-recipe" element={<AddRecipe />} />
       </Routes>
     </Router>
   );

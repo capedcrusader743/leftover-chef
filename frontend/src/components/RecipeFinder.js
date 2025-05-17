@@ -3,9 +3,10 @@ import axios from "axios";
 import IngredientTags from "./IngredientTags";
 import { useNavigate } from "react-router-dom";
 import { getAuth, signOut, onAuthStateChanged } from "firebase/auth"; // Firebase logout
-import { collection, doc, addDoc } from "firebase/firestore"; // Firebase Firestore
+import { collection, getDocs, addDoc } from "firebase/firestore"; // Firebase Firestore
 import { auth, db } from "../pages/firebase"; // Firebase initialization
 import { Link } from "react-router-dom"; // For navigation
+
 
 function RecipeFinder() {
   const [inputText, setInputText] = useState("");
@@ -53,16 +54,43 @@ function RecipeFinder() {
   const fetchRecipes = async (ingredients) => {
     setLoading(true);
     try {
-      const response = await axios.post('https://leftover-chef.onrender.com/api/find', {
+      // 1. Fetch from your API
+      const response = await axios.post("https://leftover-chef.onrender.com/api/find", {
         ingredients,
       });
-      setResults(response.data);
+
+      const apiRecipes = response.data;
+
+      // 2. Fetch custom recipes from Firestore
+      const querySnapshot = await getDocs(collection(db, "recipes"));
+      const firebaseRecipes = [];
+
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data && data.ingredients) {
+          const recipeIngredients = data.ingredients.map((i) => i.toLowerCase());
+          const hasMatch = ingredients.some((ing) => recipeIngredients.includes(ing));
+          if (hasMatch) {
+            firebaseRecipes.push({
+              ...data,
+              id: doc.id,
+              sourceUrl: "#", // placeholder if no link
+              image: data.image || "https://via.placeholder.com/150", // fallback image
+            });
+          }
+        }
+      });
+
+      // 3. Combine both sources
+      const combinedResults = [...apiRecipes, ...firebaseRecipes];
+      setResults(combinedResults);
     } catch (error) {
       console.error("Error fetching recipes:", error);
     } finally {
       setLoading(false);
     }
   };
+
 
   const handleSearch = () => {
     if (!inputText.trim()) return;
@@ -94,19 +122,30 @@ function RecipeFinder() {
 
   return (
     <div className="max-w-xl mx-auto mt-10 p-4">
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center mb-4 space-x-2">
         <h1 className="text-2xl font-bold">Leftover Chef</h1>
-        <button
-          onClick={handleLogout}
-          className="bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-700"
-        >
-          Logout
-        </button>
-        <Link to="/favorites" 
-          className="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition duration-200">
+        <div className="flex space-x-2">
+          <Link
+            to="/add-recipe"
+            className="bg-yellow-500 text-white px-4 py-2 rounded-lg shadow hover:bg-yellow-600 transition duration-200"
+          >
+             Add Recipe
+          </Link>
+          <Link
+            to="/favorites"
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition duration-200"
+          >
             View Favorites
           </Link>
+          <button
+            onClick={handleLogout}
+            className="bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-700"
+          >
+            Logout
+          </button>
+        </div>
       </div>
+
 
       <input
         type="text"
